@@ -1,0 +1,31 @@
+{
+  "name": "examatlas-backend",
+  "version": "1.0.0",
+  "description": "backend for exam Atlas",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Examatlas/ExamAtlas-Backend.git"
+  },
+  "keywords": [
+    "Exam",
+    "Atlas"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Examatlas/ExamAtlas-Backend/issues"
+  },
+  "homepage": "https://github.com/Examatlas/ExamAtlas-Backend#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.0",
+    "mongoose": "^8.6.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  }
+}
