@@ -4,6 +4,9 @@ const LiveClassSchema=mongoose.Schema({
     title:{
         type:String,
     },
+    meetingId:{
+        type:String,
+    },
     time:{
         type:String,
     },
