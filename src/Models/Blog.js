@@ -6,6 +6,7 @@ const blogSchema = new mongoose.Schema(
     },
     keyword: {
       type: String,
+      unique: false, 
     },
     content: {
       type: String,

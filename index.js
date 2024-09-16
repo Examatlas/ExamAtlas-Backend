@@ -3,7 +3,8 @@ const mongoose = require("mongoose")
 const multer = require("multer")
 const dotenv = require("dotenv")
 const userRoute = require("./src/Routes/user")
-
+const blogRoute = require("./src/Routes/Blog")
+const LiveClass = require("./src/Routes/LiveClassRoute")
 dotenv.config({path:"./.env"})
 
 const app = express();
@@ -11,7 +12,7 @@ app.use(express.json())
 
 //api
 app.use("/api/user",userRoute);
-app.use("/api/blog",Blog);
+app.use("/api/blog",blogRoute);
 app.use("/api/liveclass",LiveClass);
 
 mongoose.connect(process.env.DB).then(()=>{
