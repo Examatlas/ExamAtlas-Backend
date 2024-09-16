@@ -1,7 +1,8 @@
 const express = require("express");
-const { createLiveClass } = require("../Controllers/LiveClassControllers");
+const { createLiveClass, getAllLiveClasses } = require("../Controllers/LiveClassControllers");
 const route = express.Router()
 
-route.post("/createliveClass",createLiveClass)
+route.post("/createliveClass",createLiveClass);
+route.get("/getAllLiveClass",getAllLiveClasses);
 
 module.exports = route;
