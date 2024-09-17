@@ -140,11 +140,11 @@ exports.adminLogin = async (req, res) => {
       const { email, password } = req.body;
   
       if (!email || !password) {
-        return res.status(422).json({ status: false, message: "Mobile and password are required!" });
+        return res.status(422).json({ status: false, message: "Email and password are required!" });
       }
   
       if (!validateEmail(email)) {
-        return res.status(400).json({ status: false, message: "Mobile Number is not valid!" });
+        return res.status(400).json({ status: false, message: "Email Address is not valid!" });
       }
   
       if (!validatePassword(password)) {
@@ -158,7 +158,7 @@ exports.adminLogin = async (req, res) => {
   
       const isValidPassword = await bcrypt.compare(password, user.password);
       if (!isValidPassword) {
-        return res.status(400).json({ status: false, message: "Invalid mobile or password!" });
+        return res.status(400).json({ status: false, message: "Invalid email or password!" });
       }
   
       if (user.role !== 'admin') {
