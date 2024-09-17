@@ -1,23 +1,24 @@
 const express = require("express")
 const mongoose = require("mongoose")
 const multer = require("multer")
-const dotenv = require("dotenv");
-const cors=require("cors");
-const userRoute = require("./src/Routes/user");
-const Blog=require("./src/Routes/Blog");
-const LiveClass=require("./src/Routes/LiveClassRoute");
-
-dotenv.config({path:"./.env"});
+const dotenv = require("dotenv")
+const userRoute = require("./src/Routes/user")
+const blogRoute = require("./src/Routes/Blog")
+const LiveClass = require("./src/Routes/LiveClassRoute")
+const CurrentAffair = require("./src/Routes/CurrentAffair")
+const cors = require('cors');
+dotenv.config({path:"./.env"})
 
 const app = express();
-app.use(express.json());
-app.use(multer().any());
 app.use(cors());
+app.use(express.json())
+
 
 //api
 app.use("/api/user",userRoute);
-app.use("/api/blog",Blog);
+app.use("/api/blog",blogRoute);
 app.use("/api/liveclass",LiveClass);
+app.use("/api/currentAffair",CurrentAffair)
 
 mongoose.connect(process.env.DB).then(()=>{
   console.log("mongodb is connected.")

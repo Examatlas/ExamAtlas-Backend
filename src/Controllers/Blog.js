@@ -22,11 +22,14 @@ const createBlog = async (req, res) => {
       .status(200)
       .json({ status: true, message: "Blog created succcessfully" });
   } catch (error) {
+    console.log(error.message,"error")
     return res
       .status(500)
-      .json({ status: false, message: "internal server error!" });
+      .json({ status: false,error, message: "internal server error!" });
   }
 };
+
+
 
 // Get all blogs
 const getBlogs = async (req, res) => {
@@ -45,6 +48,8 @@ const getBlogs = async (req, res) => {
   }
 };
 
+
+
 // Get blog by ID
 const getBlogById = async(req, res) => {
   try {
@@ -55,7 +60,7 @@ const getBlogById = async(req, res) => {
     }
     return res
       .status(200)
-      .json({ status: true, blog, message: "Blog fetched succcessfully" });
+      .json({ status: true, blog, message: "Blog fetched successfully" });
   } catch (error) {
     return res
     .status(500)
@@ -64,36 +69,69 @@ const getBlogById = async(req, res) => {
 
 };
 
-// Update blog by ID
+
+
+// // Update blog by ID
+// const updateBlog = async (req, res) => {
+//   try {
+//     const { title, keyword, content, tags } = req.body;
+//     const blog = await BlogModel.find((blog) => blog.id === id);
+
+//     if (!blog) {
+//       return res.status(404).json({ message: "Blog not found" });
+//     }
+//     // Update fields
+//     blog.title = title || blog.title;
+//     blog.keyword = keyword || blog.keyword;
+//     blog.content = content || blog.content;
+//     blog.tags = Array.isArray(tags) ? tags : blog.tags;
+//     // blog.image = image || blog.image;
+//     await blog.save();
+
+//     return res
+//       .status(200)
+//       .json({ status: true, message: "Blog updated succcessfully" });
+//   } catch (error) {
+//     console.log("error",error.message)
+//     return res
+//       .status(500)
+//       .json({ status: false, message: "Internal server error", error });
+//   }
+// };
+
+
+
+// update blog by id
 const updateBlog = async (req, res) => {
   try {
     const {id}=req?.params;
     const { title, keyword, content, tags } = req.body;
-
     const blog = await BlogModel.findById(id);
   
     if (!blog) {
       return res.status(404).json({ message: "Blog not found" });
     }
+
     // Update fields
     blog.title = title || blog.title;
     blog.keyword = keyword || blog.keyword;
     blog.content = content || blog.content;
     blog.tags = Array.isArray(tags) ? tags : blog.tags;
-    // blog.image = image || blog.image;
-    await blog.save();
+
+    await blog.save(); // Save the updated blog
 
     return res
       .status(200)
-      .json({ status: true, message: "Blog updated succcessfully" });
+      .json({ status: true, message: "Blog updated successfully" });
   } catch (error) {
-    console.log(error);
-    
+    console.log("error", error.message);
     return res
       .status(500)
       .json({ status: false, message: "Internal server error", error });
   }
 };
+
+
 
 // Delete blog by ID
 const deleteBlog = async(req, res) => {
@@ -112,7 +150,6 @@ const deleteBlog = async(req, res) => {
       .status(500)
       .json({ status: false, message: "Internal Server error" });
   }
-  
 };
 
 module.exports = {

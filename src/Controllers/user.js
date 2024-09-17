@@ -3,7 +3,6 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { validateEmail, validatePhone, validateName, validatePassword } = require("../Utilis/validation");
 
-
 // signup Api
 exports.createUser = async (req, res) => {
     try {
@@ -79,7 +78,7 @@ exports.createUser = async (req, res) => {
 
 
 
-// login api 
+// user login api 
 exports.login = async (req, res) => {
     try {
         const { mobile, password } = req.body
@@ -115,7 +114,13 @@ exports.login = async (req, res) => {
             })
         }
 
-        const token = jwt.sign({userId:existingMobile._Id},process.env.JWT_SECRET,{
+        console.log("role",existingMobile.role)
+        if (existingMobile.role !== 'user') {
+            return res.status(403).json({ status: false, message: "Access denied. Only users can login." });
+          }
+      
+
+        const token = jwt.sign({userId:existingMobile._Id ,  role: existingMobile.role },process.env.JWT_SECRET,{
             expiresIn:"9d"
         })
         return res.status(200).json({status:true,message:"login Successfully",data:token})
@@ -128,4 +133,45 @@ exports.login = async (req, res) => {
 } 
 
 
+
+// Admin Login API
+exports.adminLogin = async (req, res) => {
+    try {
+      const { email, password } = req.body;
+  
+      if (!email || !password) {
+        return res.status(422).json({ status: false, message: "Email and password are required!" });
+      }
+  
+      if (!validateEmail(email)) {
+        return res.status(400).json({ status: false, message: "Email Address is not valid!" });
+      }
+  
+      if (!validatePassword(password)) {
+        return res.status(400).json({ status: false, message: "Password must contain uppercase, lowercase, digit, and a special character." });
+      }
+  
+      const user = await User.findOne({ email });
+      if (!user) {
+        return res.status(400).json({ status: false, message: "Invalid email or password!" });
+      }
+  
+      const isValidPassword = await bcrypt.compare(password, user.password);
+      if (!isValidPassword) {
+        return res.status(400).json({ status: false, message: "Invalid email or password!" });
+      }
+  
+      if (user.role !== 'admin') {
+        return res.status(403).json({ status: false, message: "Access denied. Only admins can login." });
+      }
+  
+      const token = jwt.sign({ userId: user._id, role: user.role }, process.env.JWT_SECRET, {
+        expiresIn: "9d"
+      });
+  
+      return res.status(200).json({ status: true, message: "Admin Login successful", data: token });
+    } catch (error) {
+      return res.status(500).json({ status: false, message: "Internal server error!" });
+    }
+  };
 
