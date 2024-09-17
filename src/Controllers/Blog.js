@@ -34,7 +34,7 @@ const createBlog = async (req, res) => {
 // Get all blogs
 const getBlogs = async (req, res) => {
   try {
-    const blogs = await BlogModel.find();
+    const blogs = await BlogModel.find().sort({ createdAt: -1 });
     if(!blogs){
       return res.status(404).json({status:"false",message:"Blog not found"});
     }
@@ -51,11 +51,10 @@ const getBlogs = async (req, res) => {
 
 
 // Get blog by ID
-const getBlogById = (req, res) => {
+const getBlogById = async(req, res) => {
   try {
     const id =req?.params?.id;
-    // const blog = BlogModel.find((blog) => blog.id === id);
-    const blog = BlogModel.findById(id);
+    const blog =await BlogModel.findById(id);
     if (!blog) {
       return res.status(404).json({ message: "Blog not found" });
     }
@@ -105,11 +104,10 @@ const getBlogById = (req, res) => {
 // update blog by id
 const updateBlog = async (req, res) => {
   try {
-    const { id } = req.params; // Assuming id is in the URL params
+    const {id}=req?.params;
     const { title, keyword, content, tags } = req.body;
-
-    const blog = await BlogModel.findById(id); // Find the blog by id
-
+    const blog = await BlogModel.findById(id);
+  
     if (!blog) {
       return res.status(404).json({ message: "Blog not found" });
     }
@@ -137,12 +135,8 @@ const updateBlog = async (req, res) => {
 
 // Delete blog by ID
 const deleteBlog = async(req, res) => {
-  console.log("hello world");
-  
   try {
    const id=req?.params?.id;
-   console.log(id);
-   
    const blog=await BlogModel.findByIdAndDelete(id);
 
   if (!blog) {
