@@ -16,10 +16,10 @@ exports.createCurrentAffair = async (req, res) => {
 
         await newCA.save();
 
-        res.status(201).json({ message: 'Current affair created successfully', currentAffair: newCA });
+        res.status(201).json({ status:true, message: 'Current affair created successfully', currentAffair: newCA });
     } catch (error) {
         console.error('Error creating current affair:', error);
-        res.status(500).json({ message: 'Server error', error });
+        res.status(500).json({status:false, message: 'Server error', error });
     }
 };
 
@@ -45,10 +45,10 @@ exports.updateCurrentAffair = async (req, res) => {
             return res.status(404).json({ message: 'Current affair not found' });
         }
 
-        res.status(200).json({ message: 'Current affair updated successfully', currentAffair: updatedCA });
+        res.status(200).json({ status:true,message: 'Current affair updated successfully', currentAffair: updatedCA });
     } catch (error) {
         console.error('Error updating current affair:', error);
-        res.status(500).json({ message: 'Server error', error });
+        res.status(500).json({status:false, message: 'Server error', error });
     }
 };
 
@@ -57,16 +57,16 @@ exports.updateCurrentAffair = async (req, res) => {
 // get all currentaffair
 exports.getAllCurrentAffairs = async (req, res) => {
     try {
-        const currentAffairs = await CurrentAffair.find();
+        const currentAffairs = await CurrentAffair.find().sort({ createdAt: -1 });
 
         if (currentAffairs.length === 0) {
             return res.status(404).json({ message: 'No current affairs found' });
         }
 
-        res.status(200).json({ message: 'Current affairs retrieved successfully', currentAffairs });
+        res.status(200).json({status:true, message: 'Current affairs retrieved successfully', currentAffairs });
     } catch (error) {
         console.error('Error retrieving current affairs:', error);
-        res.status(500).json({ message: 'Server error', error });
+        res.status(500).json({status:false, message: 'Server error', error });
     }
 };
 
@@ -82,10 +82,10 @@ exports.getCurrentAffairById = async (req, res) => {
             return res.status(404).json({ message: 'Current affair not found' });
         }
 
-        res.status(200).json({ message: 'Current affair retrieved successfully', currentAffair });
+        res.status(200).json({ status:true, message: 'Current affair retrieved successfully', currentAffair });
     } catch (error) {
         console.error('Error retrieving current affair:', error);
-        res.status(500).json({ message: 'Server error', error });
+        res.status(500).json({status:false, message: 'Server error', error });
     }
 };
 
@@ -102,10 +102,10 @@ exports.deleteCurrentAffair = async (req, res) => {
             return res.status(404).json({ message: 'Current affair not found' });
         }
 
-        res.status(200).json({ message: 'Current affair deleted successfully', currentAffair: deletedCA });
+        res.status(200).json({status:true, message: 'Current affair deleted successfully', currentAffair: deletedCA });
     } catch (error) {
         console.error('Error deleting current affair:', error);
-        res.status(500).json({ message: 'Server error', error });
+        res.status(500).json({status:false, message: 'Server error', error });
     }
 };
 
