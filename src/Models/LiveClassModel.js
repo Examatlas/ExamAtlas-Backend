@@ -1,23 +1,28 @@
-const mongoose=require("mongoose");
+const mongoose = require("mongoose");
 
-const LiveClassSchema=mongoose.Schema({
-    title:{
-        type:String,
-    },
-    meetingId:{
-        type:String,
-    },
-    time:{
-        type:String,
-    },
-    description:{
-        type:String,
-    },
-    date:{
-        type:String,
-    }
+const LiveClassSchema = mongoose.Schema({
+  title: {
+    type: String,
+  },
+  meetingId: {
+    type: String,
+  },
+  description: {
+    type: String,
+  },
+  teacher: {
+    type: String,
+  },
+  keyword: {
+    type: String,
+  },
+  tags: [String],
 });
 
-const LiveClassModel=mongoose.model("liveclass",LiveClassSchema,"Live Classes");
+const LiveClassModel = mongoose.model(
+  "liveclass",
+  LiveClassSchema,
+  "Live Classes"
+);
 
-module.exports=LiveClassModel
+module.exports = LiveClassModel;

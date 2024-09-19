@@ -1,8 +1,10 @@
 const express = require("express");
-const { createLiveClass, getAllLiveClasses } = require("../Controllers/LiveClassControllers");
+const { getAllLiveClasses, createMeeting, deleteClass } = require("../Controllers/LiveClassControllers");
 const route = express.Router()
 
-route.post("/createliveClass",createLiveClass);
+// route.post("/createliveClass",createLiveClass);
 route.get("/getAllLiveClass",getAllLiveClasses);
+route.post("/createMeeting",createMeeting);
+route.delete("/deleteClass/:id",deleteClass);
 
 module.exports = route;
