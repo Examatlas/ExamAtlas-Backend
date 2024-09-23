@@ -22,6 +22,12 @@ const userSchema = new mongoose.Schema({
         type:String,
         enum: ['user', 'admin'],
         default:"user"
+    },
+    token:{
+        type:String
+    },
+    tokenExpiresAt:{
+        type:Date
     }
 },
     { timestamps: true })
