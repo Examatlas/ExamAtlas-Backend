@@ -22,7 +22,7 @@ const generateMeetingToken = async () => {
 // Function to create a meeting
 async function createMeeting(req,res) {
   const {title,tags,keyword,description,teacher}=req?.body;
-
+  // const file=req?.files;
   const url = "https://api.videosdk.live/v2/rooms";
   // video sdk token
   const token='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlrZXkiOiI0OWZkNjU0Ny1lZDQ0LTRhZGYtYTExMi1iOWNmMjlmNDU3NmEiLCJwZXJtaXNzaW9ucyI6WyJhbGxvd19qb2luIl0sImlhdCI6MTcyNjQ4NTA5OSwiZXhwIjoxNzI3MDg5ODk5fQ.lEM3m7YbbEV_ppZLwR7UyN6FuYJOp_vpmAW4GYS-bp4';
