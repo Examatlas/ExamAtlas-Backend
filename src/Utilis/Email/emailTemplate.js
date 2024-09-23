@@ -42,6 +42,9 @@ const congratulationEmail = ({ email }) => {
   };
 };
 
+
+
+
 const passwordResetConfirmation = () => {
   return {
     subject: "Your Password Has Been Reset",

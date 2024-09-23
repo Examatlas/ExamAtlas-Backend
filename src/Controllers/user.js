@@ -230,7 +230,7 @@ exports.forgotPassword = async (req, res) => {
     try {
       const { email } = req.body;
       if (!email) {
-        return res.status(400).json({ message: "Email is required" });
+        return res.status(400).json({status:false, message: "Email is required" });
       }
 
       // Find the user by email
@@ -238,7 +238,7 @@ exports.forgotPassword = async (req, res) => {
       if (!user) {
         return res
           .status(400)
-          .json({ message: "User with this email does not exist" });
+          .json({ status:false , message: "User with this email does not exist" });
       }
 
       // Generate a reset token and set its expiration time (e.g., 10 minutes)
@@ -261,12 +261,13 @@ exports.forgotPassword = async (req, res) => {
       await mailPayload("forgot_password_link", payload); // Send the email with the reset URL
 
       return res.status(200).json({
+        status:true,
         message:
           "Password reset link sent to your email. Please check your inbox.",
       });
     } catch (error) {
       console.error(error.message);
-      return res.status(500).json({ message: "Internal server error" });
+      return res.status(500).json({ status:false, message: "Internal server error" });
     }
   };
 
@@ -279,7 +280,7 @@ exports.forgotPassword = async (req, res) => {
       console.log(newPassword,"new password is ")
 
       if ( !newPassword) {
-        return res.status(400).json({ message: "New password is required." });
+        return res.status(400).json({status:false, message: "New password is required." });
       }
 
       // Find user by token and ensure the token hasn't expired
@@ -292,7 +293,7 @@ exports.forgotPassword = async (req, res) => {
       console.log(user, "user")
 
       if (!user) {
-        return res.status(400).json({ message: "Invalid or expired link." });
+        return res.status(400).json({status:false, message: "Invalid or expired link." });
       }
 
       // Hash the new password
@@ -305,10 +306,10 @@ exports.forgotPassword = async (req, res) => {
 
       await user.save();
 
-      return res.status(200).json({ message: "Password reset successfully." });
+      return res.status(200).json({status:true, message: "Password reset successfully." });
     } catch (error) {
       console.error("Error in resetPassword:", error.message);
-      return res.status(500).json({ message: "Internal server error" });
+      return res.status(500).json({status:false, message: "Internal server error" });
     }
   };
 
