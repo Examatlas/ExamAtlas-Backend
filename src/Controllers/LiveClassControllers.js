@@ -6,31 +6,38 @@ const jwt=require("jsonwebtoken");
 
 // API key and Secret key from VideoSDK
 // const API_KEY = "49fd6547-ed44-4adf-a112-b9cf29f4576a";
-const API_KEY = process.env.VIDEOSDK_API_KEY;
-const SECRET_KEY =process.env.VIDEOSDK_SECRET_KEY;
+// const API_KEY = process.env.VIDEOSDK_API_KEY;
+const API_KEY = '49fd6547-ed44-4adf-a112-b9cf29f4576a';
+// const SECRET_KEY =process.env.VIDEOSDK_SECRET_KEY;
+const SECRET_KEY ="ab7ba8aa2150997be425b274bd554b9d599fff6d35142725399f4d0157f7fe21";
 
 const generateMeetingToken = async () => {
+  console.log(API_KEY,SECRET_KEY);
+  
   const payload = {
     apiKey: API_KEY,
-    permissions: ["allow_join", "allow_mod"], // Permissions for the token
+    // permissions: ["allow_join", "allow_mod"], // Permissions for the token
+    permissions: ["allow_join"], // Permissions for the token
+    versions:2,
   };
-  const token = jwt.sign(payload, SECRET_KEY, { expiresIn: "12h" });
+  const token =await jwt.sign(payload, SECRET_KEY, { expiresIn: "12h" });
 
   return token;
 };
 
 // Function to create a meeting
 async function createMeeting(req,res) {
-  const {title,tags,keyword,description,teacher}=req?.body;
+  const {title,tags,keyword,description,teacher}=req?.body; 
   // const file=req?.files;
   const url = "https://api.videosdk.live/v2/rooms";
+  const token= await generateMeetingToken();
   // video sdk token
-  const token='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlrZXkiOiI0OWZkNjU0Ny1lZDQ0LTRhZGYtYTExMi1iOWNmMjlmNDU3NmEiLCJwZXJtaXNzaW9ucyI6WyJhbGxvd19qb2luIl0sImlhdCI6MTcyNjQ4NTA5OSwiZXhwIjoxNzI3MDg5ODk5fQ.lEM3m7YbbEV_ppZLwR7UyN6FuYJOp_vpmAW4GYS-bp4';
+  // const token='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlrZXkiOiI0OWZkNjU0Ny1lZDQ0LTRhZGYtYTExMi1iOWNmMjlmNDU3NmEiLCJwZXJtaXNzaW9ucyI6WyJhbGxvd19qb2luIl0sImlhdCI6MTcyNzE3MjMxMSwiZXhwIjoxNzI3Nzc3MTExfQ.Uo4Q4LWyWsfyxuc1mXvOGkfE4Pguw0ZeGwsZTlTN-LQ';
   
   try {
-    if(!title||!keyword||!tags||!description||!teacher){
-      return res.status(400).json({message:"All fileds are required" });
-    }
+    // if(!title||!keyword||!tags||!description||!teacher){
+    //   return res.status(400).json({message:"All fileds are required" });
+    // }
     // Making POST request to create a meeting room
     const response = await axios.post(url,{},
       {
@@ -40,6 +47,8 @@ async function createMeeting(req,res) {
       },
       body: JSON.stringify({ userMeetingId: "unicorn" }),
     }, );
+    console.log(response);
+    
     if (response.status === 200) {
       const newMeeting=await LiveClassModel({
         meetingId:response?.data?.roomId,
