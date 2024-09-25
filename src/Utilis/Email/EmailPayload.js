@@ -1,5 +1,5 @@
 const { sendEmail } = require("./email");
-const EmailTemplate = require("./EmailTemplate");
+const EmailTemplate = require("./emailTemplate");
 
 module.exports.mailPayload = (template_id, payload) => {
   let template;
