@@ -12,15 +12,19 @@ const API_KEY = '49fd6547-ed44-4adf-a112-b9cf29f4576a';
 const SECRET_KEY ="ab7ba8aa2150997be425b274bd554b9d599fff6d35142725399f4d0157f7fe21";
 
 const generateMeetingToken = async () => {
-  console.log(API_KEY,SECRET_KEY);
+  // console.log(API_KEY,SECRET_KEY);
+  const options = { 
+    expiresIn: '120m', 
+    algorithm: 'HS256' 
+   };
   
   const payload = {
     apiKey: API_KEY,
-    // permissions: ["allow_join", "allow_mod"], // Permissions for the token
-    permissions: ["allow_join"], // Permissions for the token
+    permissions: ["allow_join", "allow_mod"], // Permissions for the token
+    // permissions: ["allow_join"], // Permissions for the token
     versions:2,
   };
-  const token =await jwt.sign(payload, SECRET_KEY, { expiresIn: "12h" });
+  const token =await jwt.sign(payload, SECRET_KEY, options);
 
   return token;
 };
@@ -31,6 +35,8 @@ async function createMeeting(req,res) {
   // const file=req?.files;
   const url = "https://api.videosdk.live/v2/rooms";
   const token= await generateMeetingToken();
+  console.log(token);
+  
   // video sdk token
   // const token='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlrZXkiOiI0OWZkNjU0Ny1lZDQ0LTRhZGYtYTExMi1iOWNmMjlmNDU3NmEiLCJwZXJtaXNzaW9ucyI6WyJhbGxvd19qb2luIl0sImlhdCI6MTcyNzE3MjMxMSwiZXhwIjoxNzI3Nzc3MTExfQ.Uo4Q4LWyWsfyxuc1mXvOGkfE4Pguw0ZeGwsZTlTN-LQ';
   
@@ -49,22 +55,23 @@ async function createMeeting(req,res) {
     }, );
     console.log(response);
     
-    if (response.status === 200) {
-      const newMeeting=await LiveClassModel({
-        meetingId:response?.data?.roomId,
-        title,
-        teacher,
-        tags,
-        description,
-        keyword,
-      });
-      await newMeeting.save();
+    // if (response.status === 200) {
+    //   const newMeeting=await LiveClassModel({
+    //     meetingId:response?.data?.roomId,
+    //     title,
+    //     teacher,
+    //     tags,
+    //     description,
+    //     keyword,
+    //   });
+    //   await newMeeting.save();
       return res.status(201).json({status:true,message:"Meeting Created",})
-    } 
+    // } 
   } catch (error) {
     console.error(
       "Error creating meeting:",
-      error.response ? error.response.data : error.message
+      // error.response ? error.response.data : error.message
+      error.response 
     );
     return res?.status(500)?.json({message:"Error",error});
     
