@@ -8,6 +8,7 @@ const LiveClass = require("./src/Routes/LiveClassRoute")
 const CurrentAffair = require("./src/Routes/CurrentAffair")
 const CourseRoute = require("./src/Routes/Courses");
 const CategoryRoute = require("./src/Routes/Category")
+const BookRoute = require("./src/Routes/Book");
 
 const cors = require('cors');
 dotenv.config({path:"./.env"})
@@ -23,6 +24,7 @@ app.use("/api/liveclass",LiveClass);
 app.use("/api/currentAffair",CurrentAffair)
 app.use("/api/course",CourseRoute)
 app.use("/api/category",CategoryRoute)
+app.use("/api/book",BookRoute)
 
 mongoose.connect(process.env.DB).then(()=>{
   console.log("mongodb is connected.")

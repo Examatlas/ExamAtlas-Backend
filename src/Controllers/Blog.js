@@ -71,33 +71,6 @@ const getBlogById = async(req, res) => {
 
 
 
-// // Update blog by ID
-// const updateBlog = async (req, res) => {
-//   try {
-//     const { title, keyword, content, tags } = req.body;
-//     const blog = await BlogModel.find((blog) => blog.id === id);
-
-//     if (!blog) {
-//       return res.status(404).json({ message: "Blog not found" });
-//     }
-//     // Update fields
-//     blog.title = title || blog.title;
-//     blog.keyword = keyword || blog.keyword;
-//     blog.content = content || blog.content;
-//     blog.tags = Array.isArray(tags) ? tags : blog.tags;
-//     // blog.image = image || blog.image;
-//     await blog.save();
-
-//     return res
-//       .status(200)
-//       .json({ status: true, message: "Blog updated succcessfully" });
-//   } catch (error) {
-//     console.log("error",error.message)
-//     return res
-//       .status(500)
-//       .json({ status: false, message: "Internal server error", error });
-//   }
-// };
 
 
 
