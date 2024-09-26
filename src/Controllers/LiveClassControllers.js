@@ -1,6 +1,7 @@
 const LiveClassModel = require("../Models/LiveClassModel");
 
 const jwt = require("jsonwebtoken");
+const ScheduleLiveClassModel = require("../Models/ScheduleLiveClassModel");
 
 
 // const generateMeetingToken = async () => {
@@ -23,10 +24,8 @@ const jwt = require("jsonwebtoken");
 
 // Function to create a meeting
 async function createMeeting(req, res) {
-  const { title, tags, keyword, description, teacher } = req?.body;
-  // const file=req?.files;
+  const { title, courseId, date,time} = req?.body;
   const url = "https://api.videosdk.live/v2/rooms";
-  // const token= await generateMeetingToken();
 
   const options = {
     expiresIn: "120m",
@@ -36,7 +35,7 @@ async function createMeeting(req, res) {
     apikey: process?.env?.VIDEOSDK_API_KEY,
     permissions: [`allow_join`], // `ask_join` || `allow_mod`
     version: 2, //OPTIONAL
-    roomId: `2kyv-gzay-64pg`, //OPTIONAL
+    roomId: `2kyv-gzay-64pg`, 
     participantId: `lxvdplwt`, //OPTIONAL
     roles: ["crawler"], //OPTIONAL
   };
@@ -44,7 +43,7 @@ async function createMeeting(req, res) {
   const token = jwt.sign(payload, process?.env?.VIDEOSDK_SECRET_KEY, options);
 
   try {
-    if (!title || !keyword || !tags || !description || !teacher) {
+    if (!title ||!date||!time|| !courseId) {
       return res.status(400).json({ message: "All fileds are required" });
     }
     const options = {
@@ -60,25 +59,21 @@ async function createMeeting(req, res) {
       //   // "autoStartConfig" : "see example"
       // }),
     };
+    // const response = await fetch(url, options);
 
-    // const response = await axios.post(url, options);
-    const response = await fetch(url, options);
+    // const data = await response?.json();
 
-    const data = await response?.json();
-    console.log(data);
-
-    if (data) {
-      const newMeeting = await LiveClassModel({
-        meetingId: data?.roomId,
-        token: token,
+    // if (data) {
+      const newMeeting = await ScheduleLiveClassModel({
+        // meetingId: data?.roomId,
+        // token: token,
         title,
-        teacher,
-        tags,
-        description,
-        keyword,
+        courseId,
+        date,
+        time,
       });
       await newMeeting.save();
-    }
+    // }
     return res.status(201).json({ status: true, message: "Meeting Created" });
     // }
   } catch (error) {
@@ -86,7 +81,23 @@ async function createMeeting(req, res) {
       "Error creating meeting:",
       error.response ? error.response.data : error.message
     );
-    return res?.status(500)?.json({ message: "Error", error });
+    return res?.status(500)?.json({ message: "Internal Server Error", error });
+  }
+}
+
+const getAllScheduledCourseByCourseId=async(req,res)=>{
+  try {
+    const { courseId } = req.params;
+
+    // Find all classes for the specified courseId
+    const courses = await ScheduleLiveClassModel.find({ courseId }).sort({ createdAt: -1 });
+
+    if (!courses || courses.length === 0) {
+      return res.status(404).json({ message: 'No classes found for this course' });
+    }
+    return res.status(200).json({courses,status:true,message:"All Scheduled course data fetched"});
+  } catch (error) {
+    return res?.status(500)?.json({ message: "Internal Server Error", error });
   }
 }
 
@@ -121,7 +132,7 @@ const getClassById=async(req,res)=>{
   } catch (error) {
     return res?.status(500).json({status:false,message:"Internal Server Error ",error});
   }
-}
+};
 
 const getAllLiveClasses = async (req, res) => {
   try {
@@ -175,4 +186,5 @@ module.exports = {
   createMeeting,
   deleteClass,
   getClassById,
+  getAllScheduledCourseByCourseId,
 };
