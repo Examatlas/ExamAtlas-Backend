@@ -11,6 +11,7 @@ const CategoryRoute = require("./src/Routes/Category")
 const BookRoute = require("./src/Routes/Book");
 const WishlistRoute = require("./src/Routes/Wishlist");
 const cartRoute = require("./src/Routes/Cart")
+const BillingRoute = require("./src/Routes/BillingDetail")
 
 const cors = require('cors');
 dotenv.config({path:"./.env"})
@@ -28,7 +29,8 @@ app.use("/api/course",CourseRoute)
 app.use("/api/category",CategoryRoute)
 app.use("/api/book",BookRoute)
 app.use("/api/wishlist",WishlistRoute)
-app.use("/api/cart",cartRoute)
+app.use("/api/cart",cartRoute);
+app.use("/api/billing",BillingRoute)
 
 mongoose.connect(process.env.DB).then(()=>{
   console.log("mongodb is connected.")
