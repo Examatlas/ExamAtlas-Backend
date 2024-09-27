@@ -48,7 +48,7 @@ exports.getCart = async (req, res) => {
 
 
 
-// Remove item from cart
+// // Remove item from cart
 exports.removeFromCart = async (req, res) => {
   const { userId, itemId } = req.body;
 
@@ -66,5 +66,40 @@ exports.removeFromCart = async (req, res) => {
     return res.status(200).json({ success: true, message: "Item removed from cart", cart });
   } catch (error) {
     return res.status(500).json({ success: false, message: "Failed to remove item from cart", error: error.message });
+  }
+};
+
+
+
+// Update item quantity in cart
+exports.updateCartItemQuantity = async (req, res) => {
+  const { userId, itemId, quantity } = req.body;
+
+  try {
+    const cart = await Cart.findOne({ userId });
+
+    if (!cart) {
+      return res.status(404).json({ success: false, message: "Cart not found" });
+    }
+
+    // Find the item in the cart
+    const item = cart.items.id(itemId);
+    if (!item) {
+      return res.status(404).json({ success: false, message: "Item not found in cart" });
+    }
+
+    // Update the quantity
+    if (quantity <= 0) {
+      // If quantity is less than or equal to 0, remove the item from the cart
+      cart.items = cart.items.filter(item => item._id.toString() !== itemId);
+    } else {
+      // Update the quantity
+      item.quantity = quantity;
+    }
+
+    await cart.save();
+    return res.status(200).json({ success: true, message: "Cart item updated successfully", cart });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Failed to update cart item", error: error.message });
   }
 };
