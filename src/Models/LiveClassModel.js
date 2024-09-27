@@ -4,21 +4,14 @@ const LiveClassSchema = mongoose.Schema({
   title: {
     type: String,
   },
-  meetingId: {
-    type: String,
-  },
-  token:{
-    type:String,
-  },
+ 
   description: {
     type: String,
   },
   teacher: {
     type: String,
   },
-  keyword: {
-    type: String,
-  },
+  
   tags: [String],
   
   sub_category:{
@@ -27,9 +20,7 @@ const LiveClassSchema = mongoose.Schema({
   category:{
     type:String,
   },
-  date_time:{
-    type:String,
-  }
+  
 });
 
 const LiveClassModel = mongoose.model(

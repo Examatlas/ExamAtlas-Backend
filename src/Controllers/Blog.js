@@ -69,11 +69,6 @@ const getBlogById = async(req, res) => {
 
 };
 
-
-
-
-
-
 // update blog by id
 const updateBlog = async (req, res) => {
   try {
