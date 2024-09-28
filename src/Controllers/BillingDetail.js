@@ -36,3 +36,63 @@ exports.createBillingDetail = async (req, res) => {
 };
 
 
+
+
+// Update Billing Detail
+exports.updateBillingDetail = async (req, res) => {
+  try {
+    const billingDetailId = req.params.id;
+    const updates = req.body;
+
+    // Find the billing detail by ID and update
+    const updatedBillingDetail = await BillingDetail.findByIdAndUpdate(billingDetailId, updates, { new: true });
+
+    if (!updatedBillingDetail) {
+      return res.status(404).json({ status: false, message: 'Billing detail not found' });
+    }
+
+    return res.status(200).json({ status: true, message: 'Billing detail updated successfully', updatedBillingDetail });
+  } catch (error) {
+    res.status(500).json({ status: false, message: 'Server error' });
+  }
+};
+
+
+// Get Billing Detail by ID
+exports.getBillingDetailById = async (req, res) => {
+  try {
+    const billingDetailId = req.params.id;
+
+    // Find billing detail by ID
+    const billingDetail = await BillingDetail.findById(billingDetailId);
+
+    if (!billingDetail) {
+      return res.status(404).json({ status: false, message: 'Billing detail not found' });
+    }
+
+    return res.status(200).json({ status: true, billingDetail });
+  } catch (error) {
+    res.status(500).json({ status: false, message: 'Server error' });
+  }
+};
+
+
+
+// Delete Billing Detail
+exports.deleteBillingDetail = async (req, res) => {
+  try {
+    const billingDetailId = req.params.id;
+
+    // Find the billing detail by ID and delete
+    const deletedBillingDetail = await BillingDetail.findByIdAndDelete(billingDetailId);
+
+    if (!deletedBillingDetail) {
+      return res.status(404).json({ status: false, message: 'Billing detail not found' });
+    }
+
+    return res.status(200).json({ status: true, message: 'Billing detail deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ status: false, message: 'Server error' });
+  }
+};
+
