@@ -9,16 +9,16 @@ async function createMeeting(req, res) {
   const url = "https://api.videosdk.live/v2/rooms";
 
   const options = {
-    expiresIn: "120m",
+    expiresIn: "3h",
     algorithm: "HS256",
   };
   const payload = {
     apikey: process?.env?.VIDEOSDK_API_KEY,
     permissions: [`allow_join`],
-    version: 2,
-    roomId: `2kyv-gzay-64pg`,
-    participantId: `lxvdplwt`,
-    roles: ["crawler"],
+    // version: 2,
+    // roomId: `2kyv-gzay-64pg`,
+    // participantId: `lxvdplwt`,
+    // roles: ["crawler","rtc"],
   };
 
   const token = jwt.sign(payload, process?.env?.VIDEOSDK_SECRET_KEY, options);
@@ -69,6 +69,23 @@ async function createMeeting(req, res) {
   }
 }
 
+// const joinMeeting = async (req, res) => {
+//   try {
+//     const options = {
+//       method: "GET",
+//       headers: {
+//         Authorization: "$YOUR_TOKEN",
+//         "Content-Type": "application/json",
+//       },
+//     };
+//     const roomId = "your_roomId";
+//     const url = `https://api.videosdk.live/v2/rooms/${roomId}`;
+//     const response = await fetch(url, options);
+//     const data = await response.json();
+//     console.log(data);
+//   } catch (error) {}
+// };
+
 //get all scheduled class
 const getAllScheduledCourseByCourseId = async (req, res) => {
   try {
@@ -89,6 +106,25 @@ const getAllScheduledCourseByCourseId = async (req, res) => {
     });
   } catch (error) {
     return res?.status(500)?.json({ message: "Internal Server Error", error });
+  }
+};
+
+const getScheduledCourseById = async (req, res) => {
+  try {
+    const { classId } = req?.params;
+    const course = await ScheduleLiveClassModel?.findById(classId);
+    if (!course) {
+      return res
+        ?.status(400)
+        .json({ status: false, message: "Class not Found" });
+    }
+    return res
+      ?.status(200)
+      .json({ status: true, course, message: "data fetched successfully" });
+  } catch (error) {
+    return res
+      ?.status(500)
+      .json({ error, status: false, message: "Internal server error" });
   }
 };
 //schedule live class
@@ -230,12 +266,13 @@ const deleteClass = async (req, res) => {
   }
 };
 //update live course
-const updateLiveCourse = async (req,res) => {
+const updateLiveCourse = async (req, res) => {
   try {
-    const {id}=req?.params;
-    const { title, description, teacher, tags,category,sub_category } = req.body;
+    const { id } = req?.params;
+    const { title, description, teacher, tags, category, sub_category } =
+      req.body;
     const liveCourse = await LiveClassModel.findById(id);
-  
+
     if (!liveCourse) {
       return res.status(404).json({ message: "Live course not found" });
     }
@@ -255,8 +292,8 @@ const updateLiveCourse = async (req,res) => {
       .json({ status: true, message: "Live Course updated successfully" });
   } catch (error) {
     return res
-    .status(500)
-    .json({ status: false, message: "Internal server error" });
+      .status(500)
+      .json({ status: false, message: "Internal server error" });
   }
 };
 
@@ -267,6 +304,7 @@ module.exports = {
   deleteClass,
   getClassById,
   getAllScheduledCourseByCourseId,
+  getScheduledCourseById,
   ScheduleLiveCourse,
   getLiveCourseById,
   updateLiveCourse,
