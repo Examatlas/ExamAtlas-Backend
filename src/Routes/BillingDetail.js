@@ -1,18 +1,19 @@
 // routes/billingRoutes.js
 const express = require('express');
-const { createBillingDetail, updateBillingDetail, deleteBillingDetail, getBillingDetailById } = require('../Controllers/BillingDetail');
+const { createBillingDetail, getBillingDetailByUserId,  deleteBillingDetailByBillingId, updateBillingDetailByBillingId, } = require('../Controllers/BillingDetail');
 const router = express.Router();
 
 // POST route to create billing detail
 router.post('/createBillingDetail', createBillingDetail);
 
-// Update Billing Detail
-router.put('/billing/:id',updateBillingDetail );
 
-// Delete Billing Detail
-router.delete('/deleteBilling/:id', deleteBillingDetail);
+router.delete('/billing/deletebilling/:userId/:billingId', deleteBillingDetailByBillingId);
+router.put('/billing/updatebilling/:userId/:billingId', updateBillingDetailByBillingId);
+
+
 
 // Get Billing Detail by ID
-router.get('/getbilling/:id', getBillingDetailById);
+// router.get('/getbilling/:id', getBillingDetailById);
+router.get('/billing/user/:userId', getBillingDetailByUserId);
 
 module.exports = router;
