@@ -9,6 +9,7 @@ const {
   ScheduleLiveCourse,
   getLiveCourseById,
   updateLiveCourse,
+  getScheduledCourseById,
 } = require("../Controllers/LiveClassControllers");
 const upload = require("../Middleware/multer");
 const route = express.Router();
@@ -22,6 +23,7 @@ route.get(
   "/getAllScheduledCourseByCourseId/:courseId",
   getAllScheduledCourseByCourseId
 );
+route.get("/getScheduledCourseById/:classId",getScheduledCourseById);
 route.delete("/deleteClass/:id", deleteClass);
 route.get("/getClassById/:id", getClassById);
 route.put("/updateLiveCourse/:id",updateLiveCourse);
