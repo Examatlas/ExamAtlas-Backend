@@ -90,7 +90,8 @@ exports.createUser = async (req, res) => {
 // user login api 
 exports.login = async (req, res) => {
     try {
-        const { mobile, password } = req.body;
+        const { mobile, password } = req?.body;
+        console.log(mobile,password)
         console.log(req.body)
 
         if (!mobile) {
@@ -133,7 +134,7 @@ exports.login = async (req, res) => {
         const token = jwt.sign({ userId: existingMobile._Id, role: existingMobile.role }, process.env.JWT_SECRET, {
             expiresIn: "9d"
         })
-        return res.status(200).json({ status: true, message: "login Successfully", userId: existingMobile._id, token })
+        return res.status(200).json({ status: true, message: "login Successfully", userId: existingMobile._id, token ,data: existingMobile})
     }
 
     catch (error) {
