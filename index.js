@@ -1,6 +1,7 @@
 const express = require("express")
 const mongoose = require("mongoose")
 const multer = require("multer")
+const logger = require("morgan");
 const dotenv = require("dotenv")
 const userRoute = require("./src/Routes/user")
 const blogRoute = require("./src/Routes/Blog")
@@ -17,6 +18,7 @@ const cors = require('cors');
 dotenv.config({path:"./.env"})
 
 const app = express();
+app.use(logger('dev'));
 app.use(cors());
 app.use(express.json())
 
