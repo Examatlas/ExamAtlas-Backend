@@ -10,6 +10,8 @@ exports.checkout = async (req, res) => {
       currency: "INR",
     };
     const order = await razorpayInstance.orders.create(options); // Use the correct instance here
+    console.log(order)
+
     res.status(200).json({
       success: true,
       order,
@@ -23,6 +25,7 @@ exports.checkout = async (req, res) => {
     });
   }
 };
+
 
 exports.paymentVerification = async (req, res) => {
   const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;

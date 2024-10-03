@@ -72,12 +72,17 @@ const cartRoute = require("./src/Routes/Cart");
 const BillingRoute = require("./src/Routes/BillingDetail");
 const PaymentRoute = require("./src/Routes/PaymentRoute");
 const Razorpay = require("razorpay");
+const { isAuthenticated } = require("./src/Middleware/Auth");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 app.use("/api/user", userRoute);
+
+// global middleware
+// app.use(isAuthenticated)
+
 app.use("/api/blog", blogRoute);
 app.use("/api/liveclass", LiveClass);
 app.use("/api/currentAffair", CurrentAffair);
@@ -92,6 +97,15 @@ app.use("/api", PaymentRoute);
 app.get("/api/getkey", (req, res) => {
   res.status(200).json({ key: process.env.RAZORPAY_API_KEY });
 });
+
+
+app.get("/", (req, res) => {
+  res
+    .status(200)
+    .send({ message: "Welcome to ExamAtlas backend portal.",
+  updated_at: "03-10-2024 04:40 PM IST" });
+    });
+
 
 mongoose
   .connect(process.env.DB)

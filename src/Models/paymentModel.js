@@ -13,6 +13,8 @@ const paymentSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  // user id
+  // examatlas order id 
 });
 
 const Payment = mongoose.model("Payment", paymentSchema);
