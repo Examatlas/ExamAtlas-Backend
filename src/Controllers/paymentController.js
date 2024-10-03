@@ -5,8 +5,8 @@ const Payment = require("../Models/paymentModel");
 exports.checkout = async (req, res) => {
   try {
     const options = {
-    //   amount: Number(req.body.amount * 100), // amount in smallest unit
-      amount: 5000, // amount in smallest unit
+      amount: Number(req.body.amount * 100), // amount in smallest unit
+      // amount: 5000, // amount in smallest unit
       currency: "INR",
     };
     const order = await razorpayInstance.orders.create(options); // Use the correct instance here
