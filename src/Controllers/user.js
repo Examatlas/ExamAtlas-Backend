@@ -190,11 +190,14 @@ exports.adminLogin = async (req, res) => {
 
 
 // getuserById
-
 exports.getUserById = async (req, res) => {
     try {
         const userId = req.params.id;
         const user = await User.findById(userId); // Fetch user by ID
+
+        if(!userId){
+            return res.status(400).json({Status:false,message:"user id not found!"})
+        }
 
         if (!user) {
             return res.status(404).json({ status: false, message: 'User not found' });

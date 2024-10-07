@@ -3,12 +3,12 @@ const BookModel = require("../Models/Book")
 //create a Book
 exports.createBook = async (req, res) => {
   try {
-    const { title, keyword, content,price, tags , author , category } = req?.body;
+    const { title, keyword, content,price,sellPrice,  tags , author , category } = req?.body;
 
-    if (!title || !content || !keyword || !price || !author ||  !category) {
+    if (!title || !content || !keyword || !price  || !sellPrice || !author ||  !category) {
       return res
         .status(400)
-        .json({ message: "Title, content , price , author , category and keyword are required" });
+        .json({ message: "Title, content , price , sellPrice , author , category and keyword are required" });
     }
 
     const BookPost = new BookModel({
@@ -16,6 +16,8 @@ exports.createBook = async (req, res) => {
       keyword,
       content,
       price,
+      sellPrice,
+      // shippingCharge,
       tags,
       author , 
       category
@@ -31,7 +33,6 @@ exports.createBook = async (req, res) => {
       .json({ status: false,error, message: "internal server error!" });
   }
 };
-
 
 
 // // Get all books
@@ -80,7 +81,7 @@ exports.getBookById = async(req, res) => {
 exports.updateBook = async (req, res) => {
   try {
     const {id}=req?.params;
-    const { title, keyword, content,price, tags , author , category } = req.body;
+    const { title, keyword, content,price,sellPrice,tags , author , category } = req.body;
     const book = await BookModel.findById(id);
   
     if (!book) {
@@ -91,6 +92,8 @@ exports.updateBook = async (req, res) => {
     book.title = title || book.title;
     book.keyword = keyword || book.keyword;
     book.price = price || book.price;
+    book.sellPrice = sellPrice || book.sellPrice;
+    // book.shippingCharge = shippingCharge || book.shippingCharge;
     book.author = author || book.author;
     book.category = category|| book.category;
     book.content = content || book.content;
@@ -108,7 +111,6 @@ exports.updateBook = async (req, res) => {
       .json({ status: false, message: "Internal server error", error });
   }
 };
-
 
 
 // // Delete blog by ID
