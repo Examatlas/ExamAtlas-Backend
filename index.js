@@ -77,6 +77,7 @@ const { isAuthenticated } = require("./src/Middleware/Auth");
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/user", userRoute);
 
@@ -115,6 +116,13 @@ mongoose
   .catch((error) => {
     console.log("mongodb error:", error);
   });
+
+
+  // app.get('/paymentsuccess', (req, res) => {
+  //   const reference = req.query.reference;
+  //   res.send(`Payment successful..! Reference ID: ${reference}`);
+  // });
+
 
 const port = process.env.PORT;
 

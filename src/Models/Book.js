@@ -11,6 +11,9 @@ const BookSchema = new mongoose.Schema(
     price:{
         type:Number
     },
+    sellPrice : {
+      type:Number
+    },
     content: {
       type: String,
       // required: true,
@@ -23,6 +26,9 @@ const BookSchema = new mongoose.Schema(
         type:String,
         trim:true
     },
+    // shippingCharge:{
+    //   type: String
+    // },
     tags: [String],
   },
   { timestamps: true }
