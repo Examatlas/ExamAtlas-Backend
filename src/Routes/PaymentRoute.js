@@ -12,13 +12,14 @@
 
 
 const express = require("express");
-const { checkout, paymentVerification } = require("../Controllers/paymentController"); // Adjust the path to your controller
+const { checkout, paymentVerification, getAllOrders, getOrderDetails } = require("../Controllers/paymentController"); // Adjust the path to your controller
 
 const router = express.Router();
 
 // Route for creating the order (checkout)
 router.post("/checkout", checkout);
-
+router.get("/orders", getAllOrders);
+router.get("/order/:orderId", getOrderDetails);
 // Route for payment verification
 router.post("/paymentverification", paymentVerification);
 

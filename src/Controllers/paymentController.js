@@ -76,7 +76,7 @@ exports.paymentVerification = async (req, res) => {
        console.log("Payment saved successfully:", updateOrder);
       // Redirecting to success page
       res.redirect(
-        `http://localhost:3001/paymentsuccess?reference=${updateOrder._id}&userId=${updateOrder.userId}`
+        `http://localhost:3000/paymentsuccess?reference=${updateOrder._id}&userId=${updateOrder.userId}`
       );
 
     } catch (error) {
@@ -111,4 +111,89 @@ exports.paymentVerification = async (req, res) => {
     });
   }
 };
+
+
+// get all order api 
+exports.getAllOrders = async (req, res) => {
+  try {
+    // Fetch all orders from the database
+    const orders = await Order.find().sort({ _id: -1 });
+
+    // Filter out orders with items that have a bookId of null
+    const filteredOrders = orders.filter(order => 
+      order.items && order.items.some(item => item.bookId !== null)
+    );
+
+    // Respond with the list of filtered orders
+    res.status(200).json({
+      success: true,
+      orders: filteredOrders.map(order => ({
+        _id: order._id,
+        userId: order.userId,
+        totalAmount: order.totalAmount,
+        paymentMethod: "Razorpay", // You can add this manually if it's constant
+        status: order.status,
+        billingDetailId: order.billingDetailId,
+        items: order.items.filter(item => item.bookId !== null), // Filter items with null bookId
+        razorpay_order_id: order.razorpay_order_id,
+        razorpay_payment_id: order.razorpay_payment_id,
+        razorpay_signature: order.razorpay_signature,
+      })),
+    });
+  } catch (error) {
+    console.error("Error fetching orders:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching orders",
+      error: error.message,
+    });
+  }
+};
+
+
+
+// get order by id
+exports.getOrderDetails = async (req, res) => {
+  try {
+    // Extract the order ID from the request parameters
+    const { orderId } = req.params;
+
+    // Find the order by ID
+    const order = await Order.findById(orderId);
+
+    // Check if the order exists
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    // Respond with the order details
+    res.status(200).json({
+      success: true,
+      order: {
+        _id: order._id,
+        userId: order.userId,
+        totalAmount: order.totalAmount,
+        paymentMethod: "Razorpay", // You can add this manually
+        status: order.status,
+        billingDetailId: order.billingDetailId,
+        items: order.items,
+        razorpay_order_id: order.razorpay_order_id,
+        razorpay_payment_id: order.razorpay_payment_id,
+        razorpay_signature: order.razorpay_signature,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching order details:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching order details",
+      error: error.message,
+    });
+  }
+};
+
+
 
