@@ -91,8 +91,6 @@ exports.createUser = async (req, res) => {
 exports.login = async (req, res) => {
     try {
         const { mobile, password } = req?.body;
-        console.log(mobile,password)
-        console.log(req.body)
 
         if (!mobile) {
             return res.status(422).json({ status: false, message: "Mobile Number is requried!" })
@@ -126,12 +124,12 @@ exports.login = async (req, res) => {
             })
         }
 
-        console.log("role", existingMobile.role)
+        // console.log("role", existingMobile.role)
         if (existingMobile.role !== 'user') {
             return res.status(403).json({ status: false, message: "Access denied. Only users can login." });
         }
-
-        const token = jwt.sign({ userId: existingMobile._Id, role: existingMobile.role }, process.env.JWT_SECRET, {
+        // console.log("existingMobile: ", existingMobile);
+        const token = jwt.sign({ userId: existingMobile._id, name: existingMobile.name, email: existingMobile.email, role: existingMobile.role }, process.env.JWT_SECRET, {
             expiresIn: "9d"
         })
         return res.status(200).json({ status: true, message: "You're logged in successfully", userId: existingMobile._id, token ,data: existingMobile})
@@ -176,11 +174,11 @@ exports.adminLogin = async (req, res) => {
             return res.status(403).json({ status: false, message: "Access denied. Only admins can login." });
         }
 
-        const token = jwt.sign({ userId: user?._id, role: user.role }, process.env.JWT_SECRET, {
+        const token = jwt.sign({ userId: user._id, name: user.name, email: user.email, role: user.role }, process.env.JWT_SECRET, {
             expiresIn: "9d"
         });
 
-        return res.status(200).json({ status: true, message: "Admin Login successful", token });
+        return res.status(200).json({ status: true, message: "You're logged in successfully", userId: user._id, token, data: user });
 
     } catch (error) {
         return res.status(500).json({ status: false, message: "Internal server error!" });
