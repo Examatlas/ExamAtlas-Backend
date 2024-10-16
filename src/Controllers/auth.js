@@ -77,7 +77,7 @@ exports.createUser = async (req, res) => {
         };
         await mailPayload("create_account", payload);
 
-        return res.status(200).json({ status: true, message: "Signup Successfully!!", data: newUser })
+        return res.status(200).json({ status: true, message: "Registration successful! Welcome to ExamAtlas.", data: newUser })
     }
     catch (error) {
         console.error(error.message)

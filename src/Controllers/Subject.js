@@ -7,7 +7,7 @@ exports.addSubject = async(req,res)=>{
         if (!title) {
           return res
             .status(400)
-            .json({ message: "Title is required" });
+            .json({ status: false, message: "Title is required" });
         }
         let newSubject;
         if(!id){
@@ -67,7 +67,7 @@ exports.deleteSubject = async (req, res) => {
 
     // Success response with subject data
     const updateSubject = await Subject.findByIdAndUpdate(id, {is_active: false, deletedBy: req.user.userId, deletedAt: Date()});
-    return res.status(200).json({ status: true, message: "Subject deleted successfully", data: subject });
+    return res.status(200).json({ status: true, message: "Subject deleted successfully" });
 
   } catch (error) {
     console.log(error.message);
@@ -84,8 +84,8 @@ exports.getSubject = async(req, res)=>{
            search ? {
                $or : [ {title: {$regex: `${search}`, $options: 'i'}
                   },
-                  {is_active: is_active}
-                ]
+                ],
+                is_active: is_active
             } : {
                 is_active: is_active
             },
@@ -96,9 +96,16 @@ exports.getSubject = async(req, res)=>{
         .skip((parseInt(page)-1) * parseInt(per_page))
         .limit(parseInt(per_page))
         ;
-        const totalSubject = await Subject.countDocuments({is_active: is_active});
+        const totalSubject = await Subject.countDocuments(search ? {
+          $or : [ {title: {$regex: `${search}`, $options: 'i'}
+             },
+           ],
+           is_active: is_active
+       } : {
+           is_active: is_active
+       });
     
-        res.send({message: 'Subject List fetched successfully', pagination: {
+        res.send({status: true, message: 'Subject List fetched successfully', pagination: {
             totalRows: totalSubject,
             totalPages: Math.ceil(totalSubject/per_page),
             currentPage: parseInt(page),
@@ -106,7 +113,7 @@ exports.getSubject = async(req, res)=>{
     } catch (error) {
         console.log('Error in getting subject: ', error);
         res.status(500).json({
-            success: false,
+            status: false,
             message: 'Something went wrong. We are looking into it.',
             error: error.message,
         });
