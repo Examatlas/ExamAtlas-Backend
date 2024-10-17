@@ -3,31 +3,58 @@ const BookModel = require("../Models/Book")
 //create a Book
 exports.createBook = async (req, res) => {
   try {
-    const { title, keyword, content,price,sellPrice,  tags , author , category } = req?.body;
 
-    if (!title || !content || !keyword || !price  || !sellPrice || !author ||  !category) {
+    const { type, title, keyword, content, stock, price,sellPrice, tags, author, bookUrl, categoryId, subCategoryId, subjectId } = req?.body;
+
+    if (!title || !content || !keyword || !price  || !sellPrice || !author ||  !categoryId) {
       return res
         .status(400)
-        .json({ message: "Title, content , price , sellPrice , author , category and keyword are required" });
+        .json({ message: "Title, content , price , sellPrice , author , categoryId and keyword are required" });
     }
+   const check_duplicate = await BookModel.findOne({type: type, title: title, is_active: true});
+    if(check_duplicate){
+      return res.status(400).json({ status: false, message: "Book already Exists!" });
+    }
+    let imageFilenames;
+    if(req.files.length){
+    imageFilenames = req.files.map((file) => {
+      return {
+        url: `${process.env.BACKEND_URL || 'http://localhost:5000/'}${file.filename}`,
+        filename: file.filename,
+        contentType: file.mimetype,
+        size: file.size,
+        uploadDate: Date.now()
+
+      }
+    });
+  }
 
     const BookPost = new BookModel({
+      type,
       title,
       keyword,
       content,
+      stock,
       price,
       sellPrice,
       // shippingCharge,
       tags,
-      author , 
-      category
+      author,
+      bookUrl, 
+      addedBy: req?.user?.userId,
+      categoryId,
+      subCategoryId,
+      subjectId,
+      images: imageFilenames
     });
     await BookPost.save();
     return res
       .status(200)
-      .json({ status: true, message: "Book created succcessfully",BookPost });
+      .json({ status: true, message: "Book created succcessfully",
+        // BookPost
+       });
   } catch (error) {
-    console.log(error.message,"error")
+    console.log(error.message," error")
     return res
       .status(500)
       .json({ status: false,error, message: "internal server error!" });

@@ -14,12 +14,14 @@ const cartRoute = require("./Cart");
 const BillingRoute = require("./BillingDetail");
 const PaymentRoute = require("./PaymentRoute");
 const SubjectRoute = require("./SubjectRoute");
+const fetchImage = require("./fetchImage");
 const {isAuthenticated} = require("../Middleware/Auth");
 
 
 Allrouter.use("/payment", PaymentRoute);
 Allrouter.use("/auth", authRoute);
 
+Allrouter.use("/image", fetchImage);
 Allrouter.use(isAuthenticated);
 Allrouter.use("/user", userRoute);
 Allrouter.use("/blog", blogRoute);
