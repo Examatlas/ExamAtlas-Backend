@@ -25,7 +25,7 @@ exports.createCategory = async(req,res)=>{
                     tags, is_active: true, addedBy: req.user.userId,deletedBy: null, deletedAt: null});
                 return res
                 .status(200)
-                .json({ status: true, message: `New Category ${id ? 'updated' : 'added'} successfully`, data: newSubject });
+                .json({ status: true, message: `New Category ${id ? 'updated' : 'added'} successfully`, data: newCategory });
             }
         }
         newCategory = new Category({
@@ -118,7 +118,7 @@ exports.createSubCategory = async(req,res)=>{
                     tags, is_active: true, addedBy: req.user.userId,deletedBy: null, deletedAt: null});
                 return res
                 .status(200)
-                .json({ status: true, message: `New SubCategory ${id ? 'updated' : 'added'} successfully`, data: newSubject });
+                .json({ status: true, message: `New SubCategory ${id ? 'updated' : 'added'} successfully`, data: newSubCategory });
             }
         }
         newSubCategory = new SubCategory({
@@ -254,7 +254,7 @@ exports.deleteSubCategory = async (req, res) => {
           }
           const getList = await Category.find(
                 condition,
-              {categoryName: true, is_active: true}
+              {categoryName: true, description: true, tags: true,is_active: true}
           )
           //  .populate({path:'addedBy', select:'name'})
           //  .populate({path:'deletedBy', select:'name'})
@@ -303,8 +303,9 @@ exports.deleteSubCategory = async (req, res) => {
 
         const getList = await SubCategory.find(
             condition,
-            {subCategoryName: true, is_active: true}
+            {categoryId: true, subCategoryName: true, description: true, tags: true, is_active: true}
         )
+        .populate({path: 'categoryId', select: 'categoryName description tags ', match: { is_active: true }})
         //  .populate({path:'addedBy', select:'name'})
         //  .populate({path:'deletedBy', select:'name'})
         .skip((parseInt(page)-1) * parseInt(per_page))

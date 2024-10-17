@@ -1,12 +1,13 @@
 const multer = require("multer");
+const path = require("path");
 
 // Set up storage for uploaded files
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "./uploads"); // Specify the folder where files will be saved
+    cb(null, "./src/uploads"); // Specify the folder where files will be saved
   },
   filename: function (req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname)); // Rename the file to include a timestamp
+    cb(null, Date.now()+ '_'+file.originalname); // Rename the file to include a timestamp
   },
 });
 
