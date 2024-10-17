@@ -54,7 +54,7 @@ exports.createBook = async (req, res) => {
         // BookPost
        });
   } catch (error) {
-    console.log(error.message,"error")
+    console.log(error.message," error")
     return res
       .status(500)
       .json({ status: false,error, message: "internal server error!" });
