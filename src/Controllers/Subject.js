@@ -78,7 +78,6 @@ exports.deleteSubject = async (req, res) => {
 exports.getSubject = async(req, res)=>{
     try {
         const {search, is_active=true, per_page=10 , page=1} = req?.query;
-
         // Find all subject with pagination
         const getList = await Subject.find(
            search ? {
@@ -94,8 +93,8 @@ exports.getSubject = async(req, res)=>{
         //  .populate({path:'addedBy', select:'name'})
         //  .populate({path:'deletedBy', select:'name'})
         .skip((parseInt(page)-1) * parseInt(per_page))
-        .limit(parseInt(per_page))
-        ;
+        .limit(parseInt(per_page));
+        
         const totalSubject = await Subject.countDocuments(search ? {
           $or : [ {title: {$regex: `${search}`, $options: 'i'}
              },
