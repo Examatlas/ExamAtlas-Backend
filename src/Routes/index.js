@@ -17,7 +17,10 @@ const SubjectRoute = require("./SubjectRoute");
 const fetchImage = require("./fetchImage");
 const {isAuthenticated} = require("../Middleware/Auth");
 
+
+Allrouter.use("/payment", PaymentRoute);
 Allrouter.use("/auth", authRoute);
+
 Allrouter.use("/image", fetchImage);
 Allrouter.use(isAuthenticated);
 Allrouter.use("/user", userRoute);
@@ -30,7 +33,7 @@ Allrouter.use("/book", BookRoute);
 Allrouter.use("/wishlist", WishlistRoute);
 Allrouter.use("/cart", cartRoute);
 Allrouter.use("/billing", BillingRoute);
-Allrouter.use("/payment", PaymentRoute);
+
 Allrouter.use("/subject", SubjectRoute);
 
 module.exports = Allrouter;

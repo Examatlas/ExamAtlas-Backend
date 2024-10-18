@@ -1,12 +1,10 @@
 const razorpayInstance = require("../../razorpayInstance"); // Adjust the path as needed
 const crypto = require("crypto");
 const Order = require("../Models/Order")
-
+const BillingDetail = require("../Models/BillingDetail");
 
 exports.checkout = async (req, res) => {
   try {
-    
-    // console.log("cartItems", req.body.cartItems , "userId" , req.body.userId , "billingId" , req.body.billingDetailId)
     const {cartItems , userId , billingDetailId , amount } = req.body;
     const options = {
       amount: Number(req.body.amount * 100), // amount in smallest unit
@@ -44,6 +42,7 @@ exports.checkout = async (req, res) => {
 };
 
 
+
 exports.paymentVerification = async (req, res) => {
 
   const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
@@ -60,7 +59,6 @@ exports.paymentVerification = async (req, res) => {
 
   if (isAuthentic) {
     try {
-     
       
        const updateOrder = await Order.findOneAndUpdate(
         {
@@ -113,32 +111,41 @@ exports.paymentVerification = async (req, res) => {
 };
 
 
+
 // get all order api 
 exports.getAllOrders = async (req, res) => {
   try {
-    // Fetch all orders from the database
+    // Fetch all orders from the database, sorted by _id in descending order
     const orders = await Order.find().sort({ _id: -1 });
 
-    // Filter out orders with items that have a bookId of null
+    // Filter out orders with valid items (i.e., with non-null bookId)
     const filteredOrders = orders.filter(order => 
       order.items && order.items.some(item => item.bookId !== null)
     );
 
-    // Respond with the list of filtered orders
+    // Fetch billing details for each order using their billingDetailId
+    const ordersWithBillingDetails = await Promise.all(
+      filteredOrders.map(async (order) => {
+        const billingDetail = await BillingDetail.findById(order.billingDetailId);
+        return {
+          _id: order._id,
+          userId: order.userId,
+          totalAmount: order.totalAmount,
+          paymentMethod: "Razorpay", // Static value as per your logic
+          status: order.status,
+          billingDetail: billingDetail || null, // Include billing details or null if not found
+          items: order.items.filter(item => item.bookId !== null), // Filter items with valid bookId
+          razorpay_order_id: order.razorpay_order_id,
+          razorpay_payment_id: order.razorpay_payment_id,
+          razorpay_signature: order.razorpay_signature,
+        };
+      })
+    );
+
+    // Respond with the list of orders along with billing details
     res.status(200).json({
       success: true,
-      orders: filteredOrders.map(order => ({
-        _id: order._id,
-        userId: order.userId,
-        totalAmount: order.totalAmount,
-        paymentMethod: "Razorpay", // You can add this manually if it's constant
-        status: order.status,
-        billingDetailId: order.billingDetailId,
-        items: order.items.filter(item => item.bookId !== null), // Filter items with null bookId
-        razorpay_order_id: order.razorpay_order_id,
-        razorpay_payment_id: order.razorpay_payment_id,
-        razorpay_signature: order.razorpay_signature,
-      })),
+      orders: ordersWithBillingDetails,
     });
   } catch (error) {
     console.error("Error fetching orders:", error);
@@ -149,7 +156,6 @@ exports.getAllOrders = async (req, res) => {
     });
   }
 };
-
 
 
 // get order by id
@@ -197,3 +203,110 @@ exports.getOrderDetails = async (req, res) => {
 
 
 
+// get one order by user id 
+exports.getOneOrderByUserId = async (req, res) => {
+  try {
+    // Extract userId from request parameters
+    const { userId } = req.params;
+
+    console.log("Received userId:", userId);
+
+    // Fetch the latest order matching the userId, sorted by _id in descending order
+    const order = await Order.findOne({ userId }).sort({ _id: -1 });
+
+    console.log("Fetched order:", order);
+
+    // If no order is found, respond accordingly
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "No orders found for this user",
+      });
+    }
+
+    // Fetch the billing details based on the billingDetailId
+    const billingDetail = await BillingDetail.findById(order.billingDetailId);
+
+    console.log("Fetched billing detail:", billingDetail);
+
+    // Respond with the order along with its billing details
+    res.status(200).json({
+      success: true,
+      order: {
+        _id: order._id,
+        userId: order.userId,
+        totalAmount: order.totalAmount,
+        paymentMethod: "Razorpay",
+        status: order.status,
+        billingDetail: billingDetail || null, // Include billing detail (or null if not found)
+        items: order.items.filter(item => item.bookId !== null), // Filter items with non-null bookId
+        razorpay_order_id: order.razorpay_order_id,
+        razorpay_payment_id: order.razorpay_payment_id,
+        razorpay_signature: order.razorpay_signature,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching order by userId:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching order",
+      error: error.message,
+    });
+  }
+};
+
+
+
+// Get orders by user ID
+exports.getOrdersByUserId = async (req, res) => {
+  try {
+    // Extract userId from request parameters
+    const { userId } = req.params;
+
+    console.log("Received userId:", userId);
+
+    // Fetch orders by userId and sort them by creation in descending order
+    const orders = await Order.find({ userId }).sort({ _id: -1 });
+
+    console.log("Fetched orders:", orders);
+
+    // Filter orders where items have valid bookIds
+    const filteredOrders = orders.filter(order =>
+      order.items && order.items.some(item => item.bookId !== null)
+    );
+
+    // Fetch billing details for each order and attach them to the response
+    const ordersWithBillingDetails = await Promise.all(
+      filteredOrders.map(async (order) => {
+        const billingDetail = await BillingDetail.findById(order.billingDetailId);
+
+        return {
+          _id: order._id,
+          userId: order.userId,
+          totalAmount: order.totalAmount,
+          paymentMethod: "Razorpay",
+          status: order.status,
+          billingDetailId: order.billingDetailId,
+          billingDetail, // Include the fetched billing detail
+          items: order.items.filter(item => item.bookId !== null), // Filter items with valid bookId
+          razorpay_order_id: order.razorpay_order_id,
+          razorpay_payment_id: order.razorpay_payment_id,
+          razorpay_signature: order.razorpay_signature,
+        };
+      })
+    );
+
+    // Send the final response with the orders and billing details
+    res.status(200).json({
+      success: true,
+      orders: ordersWithBillingDetails,
+    });
+  } catch (error) {
+    console.error("Error fetching orders by userId:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching orders",
+      error: error.message,
+    });
+  }
+};

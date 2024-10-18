@@ -1,18 +1,5 @@
-// const express = require("express");
-// const { checkout, paymentVerification } = require("../Controllers/paymentController"); // Correct require statement
-
-// const router = express.Router();
-
-// // Define routes with the corresponding handlers
-// router.route("/checkout").post(checkout);
-// router.route("/paymentverification").post(paymentVerification);
-
-// module.exports = router;
-
-
-
 const express = require("express");
-const { checkout, paymentVerification, getAllOrders, getOrderDetails } = require("../Controllers/paymentController"); // Adjust the path to your controller
+const { checkout, paymentVerification, getAllOrders, getOrderDetails, getOrdersByUserId, getOneOrderByUserId } = require("../Controllers/paymentController"); // Adjust the path to your controller
 
 const router = express.Router();
 
@@ -22,5 +9,10 @@ router.get("/orders", getAllOrders);
 router.get("/order/:orderId", getOrderDetails);
 // Route for payment verification
 router.post("/paymentverification", paymentVerification);
+
+router.get("/getOrdersByUserId/:userId", getOrdersByUserId);
+router.get("/getOneOrderByUserId/:userId", getOneOrderByUserId);
+
+
 
 module.exports = router;
