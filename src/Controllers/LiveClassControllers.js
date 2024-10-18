@@ -1,5 +1,5 @@
 const LiveClassModel = require("../Models/LiveClassModel");
-
+const {generateToken} = require("../Utilis/generateToken");
 const jwt = require("jsonwebtoken");
 const ScheduleLiveClassModel = require("../Models/ScheduleLiveClassModel");
 
@@ -130,20 +130,60 @@ const getScheduledCourseById = async (req, res) => {
 //schedule live class
 const ScheduleLiveCourse = async (req, res) => {
   try {
-    const { title, courseId, date, time } = req?.body;
+    const { title, courseId, date, time, description, duration } = req?.body;
     if (!title || !date || !time || !courseId) {
       return res.status(400).json({ message: "All fileds are required" });
     }
 
+    const url = "https://api.videosdk.live/v2/rooms";
+    const admin_token = generateToken("admin");
+    if (courseId) {
+       const check_live_course = await LiveClassModel.findById(courseId);
+       if(!check_live_course){
+        return res?.status(404)?.json({ message: "Live Course not found" });
+       }
+       if(check_live_course.is_active === false){
+        return res?.status(404)?.json({ message: "Live Course not active" });
+       }
+       const check_duplicate = await ScheduleLiveClassModel.findOne({courseId: courseId, title: title, is_active: true});
+       if(check_duplicate){
+         return res.status(400).json({ status: false, message: "Live Class already Exists!" });
+       }
+    }else{
+      return res?.status(404)?.json({ message: "Id Required" });
+    }
+    const options = {
+      method: "POST",
+      headers: {
+        Authorization: `${admin_token}`,
+        "Content-Type": "application/json",
+      },
+      // body: JSON.stringify({
+      //   "customRoomId" : "aaa-bbb-ccc",
+      //   // "webhook" : "see example",
+      //   // "autoCloseConfig" : "see example",
+      //   // "autoStartConfig" : "see example"
+      // }),
+    };
+    const response = await fetch(url, options);
+
+    const data = await response?.json();
+
     const newMeeting = await ScheduleLiveClassModel({
-      title,
       courseId,
+      title,
+      description,
       date,
       time,
+      meetingId: data?.roomId,
+      scheduleTime: date,
+      duration,
+      addedBy: req?.user?.userId
     });
     await newMeeting.save();
-    return res.status(201).json({ status: true, message: "Class Scheduled" });
+    return res.status(201).json({ status: true, message: "Live Class Scheduled", newMeeting });
   } catch (error) {
+    console.log(error)
     return res?.status(500)?.json({ message: "Internal Server Error", error });
   }
 };
@@ -152,28 +192,55 @@ const createLiveClass = async (req, res) => {
   try {
     const {
       teacher,
-      // keyword,
       tags,
-      // date_time,
-      category,
-      sub_category,
       title,
-      description,
+      description, categoryId, subCategoryId, subjectId,  startDate,
+      endDate,
     } = req?.body;
     if (
       !teacher ||
       !title ||
       !description ||
       !tags ||
-      !category ||
-      !sub_category
+      !categoryId ||
+      !subCategoryId
     ) {
       return res
         .status(422)
         .json({ status: false, message: "All fields are required" });
     }
-    const newClass = await LiveClassModel(req?.body);
-    await newClass.save();
+    const check_duplicate = await LiveClassModel.findOne({title: title, is_active: true});
+    if(check_duplicate){
+      return res.status(400).json({ status: false, message: "Course already Exists!" });
+    }
+    let imageFilenames;
+    if(req.files.length){
+    imageFilenames = req.files.map((file) => {
+      return {
+        url: `${process.env.BACKEND_URL || 'http://localhost:5000/'}${file.filename}`,
+        filename: file.filename,
+        contentType: file.mimetype,
+        size: file.size,
+        uploadDate: Date.now()
+
+      }
+    });
+  }
+
+  const newCourse = new LiveClassModel({
+    title,
+    description,
+    tags,
+    teacher,
+    addedBy: req?.user?.userId,
+    categoryId,
+    subCategoryId,
+    subjectId,
+    startDate,
+    endDate,
+    images: imageFilenames
+  });
+    await newCourse.save();
     return res
       .status(200)
       .json({ status: true, message: "Class Created Successfully" });
@@ -226,11 +293,11 @@ const getAllLiveClasses = async (req, res) => {
     if (!classes) {
       return res
         .status(404)
-        .json({ status: false, message: "No Live Class Found" });
+        .json({ status: false, message: "No Live Courses Found" });
     }
     return res
       .status(200)
-      .json({ status: true, classes, message: "Class Created Successfully" });
+      .json({ status: true, classes, message: "Live Courses fetched Successfully" });
   } catch (error) {
     return res
       .status(500)
@@ -252,7 +319,7 @@ const deleteClass = async (req, res) => {
     if (!deleteClass) {
       return res
         ?.status(404)
-        .json({ status: false, message: "Class not found" });
+        .json({ status: false, message: "Course not found" });
     }
 
     return res
@@ -262,7 +329,7 @@ const deleteClass = async (req, res) => {
   } catch (error) {
     return res
       ?.status(500)
-      .json({ status: false, message: "Internal Server Error", error });
+      .json({ status: false, message: "Something went wrong, We're working on it.", error });
   }
 };
 //update live course
@@ -297,6 +364,18 @@ const updateLiveCourse = async (req, res) => {
   }
 };
 
+const joinNow = async(req, res) => {
+  try{
+  const { role, expiresIn, scheduledClassId } = req.body; // Admin or student role
+  const userId = req?.user?.userId;
+  const token = generateToken(role, expiresIn, scheduledClassId, userId);
+  res.status(200).json({status:true, token, user_name: req?.user?.name });
+}catch(err){
+  console.log("error: ", err);
+  res.status(500).json({status:false,message: "Something went wrong, We're working on it." ,error: err });
+}
+};
+
 module.exports = {
   createLiveClass,
   getAllLiveClasses,
@@ -308,4 +387,5 @@ module.exports = {
   ScheduleLiveCourse,
   getLiveCourseById,
   updateLiveCourse,
+  joinNow
 };
