@@ -10,7 +10,9 @@ const {
   getLiveCourseById,
   updateLiveCourse,
   getScheduledCourseById,
-  joinNow
+  joinNow,
+  endNow,
+  saveChatMessage
 } = require("../Controllers/LiveClassControllers");
 const upload = require("../Middleware/multer");
 const route = express.Router();
@@ -29,5 +31,7 @@ route.delete("/deleteClass/:id", deleteClass);
 route.get("/getClassById/:id", getClassById);
 route.put("/updateLiveCourse/:id",updateLiveCourse);
 route.post('/joinNow', joinNow);
+route.post('/endNow', endNow);
+route.post('/saveMessage', saveChatMessage);
 
 module.exports = route;

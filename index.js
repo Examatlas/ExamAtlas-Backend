@@ -22,7 +22,7 @@ app.get("/", (req, res) => {
   res
     .status(200)
     .send({ message: "Welcome to ExamAtlas backend portal.",
-  updated_at: "18-10-2024 06:47 PM IST" });
+  updated_at: "19-10-2024 08:30 PM IST" });
     });
 
 

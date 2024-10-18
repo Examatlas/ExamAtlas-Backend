@@ -44,6 +44,14 @@ duration: {
     type: Number, // in minutes
     required: false,
 },
+startedAt: {
+  type: Date,
+  required: false,
+},
+endedAt: {
+  type: Date,
+  required: false,
+},
 students: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User', // Users who will attend this live class

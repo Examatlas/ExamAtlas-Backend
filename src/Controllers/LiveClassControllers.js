@@ -2,12 +2,17 @@ const LiveClassModel = require("../Models/LiveClassModel");
 const {generateToken} = require("../Utilis/generateToken");
 const jwt = require("jsonwebtoken");
 const ScheduleLiveClassModel = require("../Models/ScheduleLiveClassModel");
+const ChatMessage = require("../Models/ChatMessage");
 
 // Function to create a meeting
 async function createMeeting(req, res) {
   const { id } = req?.params;
+  const check = await ScheduleLiveClassModel.findById(id);
+  if(check?.meetingId){
+    return res.status(201).json({ status: true, message: "Meeting already Created" });
+  }
   const url = "https://api.videosdk.live/v2/rooms";
-
+  
   const options = {
     expiresIn: "3h",
     algorithm: "HS256",
@@ -366,16 +371,72 @@ const updateLiveCourse = async (req, res) => {
 
 const joinNow = async(req, res) => {
   try{
-  const { role, expiresIn, scheduledClassId } = req.body; // Admin or student role
+  const { role, expiresIn, scheduledClassId, meetingId } = req.body; // Admin or student role
   const userId = req?.user?.userId;
+  let getScheduledCourse;
+  if(scheduledClassId){
+    getScheduledCourse = await ScheduleLiveClassModel.findById(scheduledClassId);
+    if(getScheduledCourse.status === "cancelled" || getScheduledCourse.status === "completed"){
+      return res.status(500).json({status:false,message: `Meeting has been ${getScheduledCourse.status}.` ,getScheduledCourse });
+    }
+  }
   const token = generateToken(role, expiresIn, scheduledClassId, userId);
-  res.status(200).json({status:true, token, user_name: req?.user?.name });
+  if(getScheduledCourse.status !== "live" && role === 'admin'){
+    try{
+   await ScheduleLiveClassModel.findByIdAndUpdate(scheduledClassId,{
+    status: "live",
+    startedAt: Date()
+  })
+}catch(err) {console.log(err);}
+}
+  return res.status(200).json({status:true, token, user_name: req?.user?.name, userId: req?.user?.userId ,getScheduledCourse });
+
 }catch(err){
   console.log("error: ", err);
   res.status(500).json({status:false,message: "Something went wrong, We're working on it." ,error: err });
 }
 };
 
+const endNow = async(req, res) => {
+  try{
+  const { role, endedAt, scheduledClassId, meetingId } = req.body; // Admin or student role
+   if(role === "admin"){
+    try{
+   await ScheduleLiveClassModel.findByIdAndUpdate(scheduledClassId,{
+    status: "completed",
+    endedAt: endedAt
+  })
+  res.status(200).json({status: true, message: "Meeting has been ended successfully" });
+}catch(err) {
+  console.log(err);
+  res.status(500).json({status: false, message: "Something went wrong, We're working on it.", error: err });
+}
+   }else{
+    res.status(500).json({status: false, message: "Meeting can't ended by User" });
+   }
+  
+
+}catch(err){
+  console.log("error: ", err);
+  res.status(500).json({status:false,message: "Something went wrong, We're working on it." ,error: err });
+}
+};
+
+const saveChatMessage = async (req, res) => {
+  const { id, payload, senderId, senderName,topic, message, timestamp } = req.body;
+  try {
+    // Create a new chat message and save it to the database
+    const newMessage = new ChatMessage({
+      id, scheduledClassId: payload.scheduledClassId,meetingId: payload.meetingId, senderId, userId: payload.userId, senderName,topic, message, timestamp
+    });
+
+    await newMessage.save(); // Save the message to the database
+    res.status(201).json({ status: true, message: 'Message saved successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ status: false, message: 'Failed to save message' });
+  }
+}
 module.exports = {
   createLiveClass,
   getAllLiveClasses,
@@ -387,5 +448,7 @@ module.exports = {
   ScheduleLiveCourse,
   getLiveCourseById,
   updateLiveCourse,
-  joinNow
+  joinNow,
+  endNow,
+  saveChatMessage
 };
