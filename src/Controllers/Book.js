@@ -1,4 +1,5 @@
 const BookModel = require("../Models/Book")
+const mongoose = require("mongoose");
 
 //create a Book
 exports.createBook = async (req, res) => {
@@ -62,21 +63,99 @@ exports.createBook = async (req, res) => {
 };
 
 
-// // Get all books
-exports.getBooks = async (req, res) => {
+// Function to get paginated all books with isInCart flag for a specific user
+exports.getBooksPaginatedWithCartFlag = async (req, res) => {
   try {
-    const books = await BookModel.find().sort({ createdAt: -1 });
-    if(!books){
-      return res.status(404).json({status:"false",message:"Book not found"});
+    const {type, categoryId, subCategoryId, subjectId, search, is_active=true,page = 1, per_page = 10, sortOrder='asc'} = req.query;
+    const userId = req?.user?.userId;
+    const skip = (parseInt(page) - 1) * parseInt(per_page); // Calculate how many items to skip
+    // Determine sorting order: 'asc' for ascending, 'desc' for descending
+    const sortDirection = sortOrder === 'asc' ? 1 : -1;
+
+    let condition = {};
+    condition.is_active = is_active;
+    if(type){
+      condition.type = type;
+  }
+    if(categoryId){
+        condition.categoryId = categoryId;
     }
-    return res
-      .status(200)
-      .json({ status: true, message: "Books fetched succcessfully",books });
+    if(subCategoryId){
+      condition.subCategoryId = subCategoryId;
+  }
+  if(subjectId){
+    condition.subjectId = subjectId;
+}
+    if(search){
+        condition["$or"] = [ {title: {$regex: `${search}`, $options: 'i'}
+               }
+             ];
+    }
+    // Count total active books (for pagination metadata)
+    const totalBooks = await BookModel.countDocuments(condition);
+    // Aggregate query with pagination
+    const booksWithCartFlag = await BookModel.aggregate([
+      {
+        $match: condition // Fetch only active books
+      },
+      {
+        $lookup: {
+          from: 'carts', // Cart collection
+          let: { bookId: '$_id' }, // Current book _id
+          pipeline: [
+            { 
+              $match: { 
+                $expr: { 
+                  $eq: ['$userId', new mongoose.Types.ObjectId(userId)] // Match the userId from Cart
+                }
+              }
+            },
+            { $unwind: '$items' }, // Unwind cart items
+            { 
+              $match: { 
+                $expr: { 
+                  $eq: ['$items.bookId', '$$bookId'] // Match bookId from Cart items
+                } 
+              } 
+            }
+          ],
+          as: 'cartItems'
+        }
+      },
+      {
+        $addFields: {
+          isInCart: { $gt: [{ $size: '$cartItems' }, 0] } // If cartItems array has elements, set isInCart to true
+        }
+      },
+      {
+        $project: {
+          cartItems: 0 // Remove cartItems field from the final result
+        }
+      },
+      {
+        $sort: { createdAt: sortDirection } // Sort by createdAt (ascending or descending)
+      },
+      { $skip: skip },  // Pagination: Skip the first (page-1) * limit records
+      { $limit: parseInt(per_page) }, // Pagination: Limit the results to the given page size (default 10)
+    ]);
+
+    // Pagination metadata
+    const totalPages = Math.ceil(totalBooks / parseInt(per_page));
+
+    return res.status(200).send({
+      status: true,
+      message: "Books fetched succcessfully",
+      books: booksWithCartFlag,
+      pagination: {
+        totalRows: totalBooks,
+        totalPages,
+        currentPage: parseInt(page),
+        pageSize: parseInt(per_page)
+      }
+    });
   } catch (error) {
-    console.log(error.message)
-    return res
-      .status(500)
-      .json({ status: false, error, message: "Internal server error",error });
+    console.error(error);
+    res.status(500).send({status:true, nessage: 'Error fetching paginated books', error: error});
   }
 };
 
