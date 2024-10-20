@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const generateToken = (role, expiresIn, scheduledClassId, userId) => {
+const generateToken = (role, expiresIn, meetingId, userId) => {
     
 const apiKey = process.env.VIDEOSDK_API_KEY;
     const secretKey = process.env.VIDEOSDK_SECRET_KEY;
@@ -11,9 +11,9 @@ const apiKey = process.env.VIDEOSDK_API_KEY;
       {
         apikey: apiKey,
         permissions,
-        role,
-        scheduledClassId,
-        userId
+        version: 2,
+        meetingId,
+        participantId: userId
       },
       secretKey,
       { expiresIn: expiresIn || '1h' } // Token expiration time
