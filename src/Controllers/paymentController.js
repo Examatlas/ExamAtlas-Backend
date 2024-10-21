@@ -74,7 +74,7 @@ exports.paymentVerification = async (req, res) => {
        console.log("Payment saved successfully:", updateOrder);
       // Redirecting to success page
       res.redirect(
-        `http://localhost:3000/paymentsuccess?reference=${updateOrder._id}&userId=${updateOrder.userId}`
+        `http://localhost:3001/paymentsuccess?reference=${updateOrder._id}&userId=${updateOrder.userId}`
       );
 
     } catch (error) {
@@ -266,7 +266,7 @@ exports.getOrdersByUserId = async (req, res) => {
     console.log("Received userId:", userId);
 
     // Fetch orders by userId and sort them by creation in descending order
-    const orders = await Order.find({ userId }).sort({ _id: -1 });
+    const orders = await Order.find({ userId , status: "Paid"  }).sort({ _id: -1 });
 
     console.log("Fetched orders:", orders);
 
