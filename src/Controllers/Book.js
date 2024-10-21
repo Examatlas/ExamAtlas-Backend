@@ -39,7 +39,7 @@ exports.createBook = async (req, res) => {
       price,
       sellPrice,
       // shippingCharge,
-      tags,
+      tags: tags ? JSON.parse(tags): null,
       author,
       bookUrl, 
       addedBy: req?.user?.userId,

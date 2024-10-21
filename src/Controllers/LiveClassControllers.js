@@ -239,7 +239,7 @@ const createLiveClass = async (req, res) => {
   const newCourse = new LiveClassModel({
     title,
     description,
-    tags,
+    tags: tags ? JSON.parse(tags) : null,
     teacher,
     addedBy: req?.user?.userId,
     categoryId,
@@ -254,6 +254,7 @@ const createLiveClass = async (req, res) => {
       .status(200)
       .json({ status: true, message: "Class Created Successfully" });
   } catch (error) {
+    console.log("error: ",error);
     return res
       .status(500)
       .json({ status: false, message: "Internal server error" });
