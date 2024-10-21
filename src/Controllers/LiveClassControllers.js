@@ -199,8 +199,12 @@ const createLiveClass = async (req, res) => {
       teacher,
       tags,
       title,
-      description, categoryId, subCategoryId, subjectId,  startDate,
-      endDate,
+      description,
+      categoryId,
+      subCategoryId,
+      subjectId,
+      startDate, //optional
+      endDate, //optional
     } = req?.body;
     if (
       !teacher ||
