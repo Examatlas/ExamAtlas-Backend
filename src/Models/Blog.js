@@ -3,6 +3,7 @@ const blogSchema = new mongoose.Schema(
   {
     title: {
       type: String,
+      required:true,
     },
     keyword: {
       type: String,
@@ -11,6 +12,11 @@ const blogSchema = new mongoose.Schema(
     content: {
       type: String,
       // required: true,
+    },
+    is_active: {
+      type: Boolean,
+      required: true,
+      default: true
     },
     tags: [String],
   },

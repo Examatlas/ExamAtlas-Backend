@@ -22,25 +22,59 @@ const createBlog = async (req, res) => {
       .status(200)
       .json({ status: true, message: "Blog created succcessfully" });
   } catch (error) {
-    console.log(error.message,"error")
+    console.log(error.message, "error");
     return res
       .status(500)
-      .json({ status: false,error, message: "internal server error!" });
+      .json({ status: false, error, message: "internal server error!" });
   }
 };
-
-
 
 // Get all blogs
 const getBlogs = async (req, res) => {
   try {
-    const blogs = await BlogModel.find().sort({ createdAt: -1 });
-    if(!blogs){
-      return res.status(404).json({status:"false",message:"Blog not found"});
-    }
-    return res
-      .status(200)
-      .json({ status: true, blogs, message: "Blogs fetched succcessfully" });
+    const { search, is_active = true, per_page = 10, page = 1 } = req?.query;
+    // find blog based on pagination and Serach
+    const blogs = await BlogModel.find(
+      search
+        ? {
+            $or: [{ title: { $regex: `${search}`, $options: "i" } }],
+            is_active: is_active,
+          }
+        : {
+            is_active: is_active,
+          },
+      { title: true, is_active: true, content:true,tags:true,keyword:true }
+    )
+      .sort({ createdAt: -1 })
+      .skip((parseInt(page) - 1) * parseInt(per_page))
+      .limit(parseInt(per_page));
+
+    const totalBlogs = await BlogModel?.countDocuments(
+      search
+        ? {
+            $or: [{ title: { $regex: `${search}`, $options: "i" } }],
+            is_active: is_active,
+          }
+        : {
+            is_active: is_active,
+          }
+    );
+
+    // if (!blogs) {
+    //   return res
+    //     .status(404)
+    //     .json({ status: "false", message: "Blog not found" });
+    // }
+    return res.status(200).json({
+      status: true,
+      data:blogs,
+      message: "Blogs fetched succcessfully",
+      pagination: {
+        totalRows: totalBlogs,
+        totalPages: Math.ceil(totalBlogs / per_page),
+        currentPage: parseInt(page),
+      },
+    });
   } catch (error) {
     return res
       .status(500)
@@ -48,13 +82,11 @@ const getBlogs = async (req, res) => {
   }
 };
 
-
-
 // Get blog by ID
-const getBlogById = async(req, res) => {
+const getBlogById = async (req, res) => {
   try {
-    const id =req?.params?.id;
-    const blog =await BlogModel.findById(id);
+    const id = req?.params?.id;
+    const blog = await BlogModel.findById(id);
     if (!blog) {
       return res.status(404).json({ message: "Blog not found" });
     }
@@ -63,19 +95,18 @@ const getBlogById = async(req, res) => {
       .json({ status: true, blog, message: "Blog fetched successfully" });
   } catch (error) {
     return res
-    .status(500)
-    .json({ status: false, error, message: "Internal server error" });
+      .status(500)
+      .json({ status: false, error, message: "Internal server error" });
   }
-
 };
 
 // update blog by id
 const updateBlog = async (req, res) => {
   try {
-    const {id}=req?.params;
+    const { id } = req?.params;
     const { title, keyword, content, tags } = req.body;
     const blog = await BlogModel.findById(id);
-  
+
     if (!blog) {
       return res.status(404).json({ message: "Blog not found" });
     }
@@ -99,20 +130,18 @@ const updateBlog = async (req, res) => {
   }
 };
 
-
-
 // Delete blog by ID
-const deleteBlog = async(req, res) => {
+const deleteBlog = async (req, res) => {
   try {
-   const id=req?.params?.id;
-   const blog=await BlogModel.findByIdAndDelete(id);
+    const id = req?.params?.id;
+    const blog = await BlogModel.findByIdAndDelete(id);
 
-  if (!blog) {
-    return res.status(404).json({ message: "Blog not found" });
-  }
-  return res
-  .status(200)
-  .json({ status: true, message: "Blog deleted succcessfully" });
+    if (!blog) {
+      return res.status(404).json({ message: "Blog not found" });
+    }
+    return res
+      .status(200)
+      .json({ status: true, message: "Blog deleted succcessfully" });
   } catch (error) {
     return res
       .status(500)
@@ -127,4 +156,3 @@ module.exports = {
   updateBlog,
   deleteBlog,
 };
-
