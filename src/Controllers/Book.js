@@ -94,7 +94,7 @@ exports.getBooksPaginatedWithCartFlag = async (req, res) => {
     // Count total active books (for pagination metadata)
     const totalBooks = await BookModel.countDocuments(condition);
     // Aggregate query with pagination
-    const booksWithCartFlag = await BookModel.aggregate([
+    const booksWithCartAndWishlistFlags = await BookModel.aggregate([
       {
         $match: condition // Fetch only active books
       },
@@ -123,13 +123,38 @@ exports.getBooksPaginatedWithCartFlag = async (req, res) => {
         }
       },
       {
+        $lookup: {
+          from: 'wishlists', // Wishlist collection
+          let: { bookId: '$_id' }, // Current book _id
+          pipeline: [
+            { 
+              $match: { 
+                $expr: { 
+                  $eq: ['$userId', new mongoose.Types.ObjectId(userId)] // Match the userId from WishList
+                }
+              }
+            },
+            { 
+              $match: { 
+                $expr: { 
+                  $eq: ['$bookId', '$$bookId'] // Match bookId from WishList
+                } 
+              } 
+            }
+          ],
+          as: 'wishItems'
+        }
+      },
+      {
         $addFields: {
-          isInCart: { $gt: [{ $size: '$cartItems' }, 0] } // If cartItems array has elements, set isInCart to true
+          isInCart: { $gt: [{ $size: '$cartItems' }, 0] }, // If cartItems array has elements, set isInCart to true
+          isInWishList: { $gt: [{ $size: '$wishItems' }, 0] } // If wishItems array has elements, set isInWishList to true
         }
       },
       {
         $project: {
-          cartItems: 0 // Remove cartItems field from the final result
+          cartItems: 0, // Remove cartItems field from the final result
+          wishItems: 0  // Remove wishItems field from the final result
         }
       },
       {
@@ -138,6 +163,7 @@ exports.getBooksPaginatedWithCartFlag = async (req, res) => {
       { $skip: skip },  // Pagination: Skip the first (page-1) * limit records
       { $limit: parseInt(per_page) }, // Pagination: Limit the results to the given page size (default 10)
     ]);
+    
 
     // Pagination metadata
     const totalPages = Math.ceil(totalBooks / parseInt(per_page));
@@ -145,7 +171,7 @@ exports.getBooksPaginatedWithCartFlag = async (req, res) => {
     return res.status(200).send({
       status: true,
       message: "Books fetched succcessfully",
-      books: booksWithCartFlag,
+      books: booksWithCartAndWishlistFlags,
       pagination: {
         totalRows: totalBooks,
         totalPages,
