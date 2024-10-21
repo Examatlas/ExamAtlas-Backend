@@ -254,7 +254,7 @@ exports.forgotPassword = async (req, res) => {
       user.tokenExpiresAt = tokenExpiresAt;
       await user.save();
 
-      const resetURL = `http://localhost:3000/examAtlas/reset-password-token?token=${resetToken}`;
+      const resetURL = `http://localhost:3001/examAtlas/reset-password-token?token=${resetToken}`;
 
       // Send the reset link via email
       const payload = {
